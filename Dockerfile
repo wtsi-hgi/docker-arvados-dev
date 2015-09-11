@@ -26,7 +26,6 @@ RUN sudo apt-get -q=2 -y install \
 	 git \
 	 golang=2:1.3.3-1 \
 	 graphviz \
-	 iceweasel \
 	 libattr1-dev \
 	 libfuse-dev \
 	 libcrypt-ssleay-perl \
@@ -72,10 +71,50 @@ RUN \
     sudo tar -C /usr/local -xjf /tmp/$PJS.tar.bz2 && \
     sudo ln -s ../$PJS/bin/phantomjs /usr/local/bin/
 
+# Install firefox v34
+RUN \
+    sudo apt-get -q=2 -y --no-install-recommends install \
+	 debianutils \
+	 fontconfig \
+	 libasound2 \
+	 libatk1.0-0 \
+	 libc6 \
+	 libcairo2 \
+	 libdbus-1-3 \
+	 libdbus-glib-1-2 \
+	 libevent-2.0-5 \
+	 libffi6 \
+	 libfontconfig1 \
+	 libfreetype6 \
+	 libgcc1 \
+	 libgdk-pixbuf2.0-0 \
+	 libglib2.0-0 \
+	 libgtk2.0-0 \
+	 libhunspell-1.3-0 \
+	 libpango-1.0-0 \
+	 libsqlite3-0 \
+	 libstartup-notification0 \
+	 libstdc++6 \
+	 libx11-6 \
+	 libxcomposite1 \
+	 libxdamage1 \
+	 libxext6 \
+	 libxfixes3 \
+	 libxrender1 \
+	 libxt6 \
+	 procps \
+	 zlib1g && \
+    cd /tmp && \
+    wget -q http://releases.mozilla.org/pub/mozilla.org/firefox/releases/34.0/linux-x86_64/en-US/firefox-34.0.tar.bz2 && \
+    ( echo "7413964b9e9588f324b62af7ab03bdc1  /tmp/firefox-34.0.tar.bz2" | md5sum -c ) && \
+    cd ~ && \
+    tar xf /tmp/firefox-34.0.tar.bz2 && \
+    sudo ln -s ~/firefox/firefox /usr/local/bin/firefox
+
 # Install new versions of pip and setuptools
 RUN \
-    ( wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python ) && \
-    ( wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python )
+    ( wget -q https://bootstrap.pypa.io/ez_setup.py -O - | sudo python ) && \
+    ( wget -q https://bootstrap.pypa.io/get-pip.py -O - | sudo python )
 
 # Setup git config
 RUN git config --global push.default matching
