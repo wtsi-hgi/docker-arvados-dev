@@ -13,14 +13,23 @@ docker build -t local/docker-arvados-dev docker-arvados-dev
 
 To run all tests against the master branch (of https://github.com/curoverse/arvados):
 ```bash
- docker run -it local/docker-arvados-dev
+ docker run -it --privileged local/docker-arvados-dev
  ```
 or, equivalently:
 ```bash
-docker run -it local/docker-arvados-dev time ~/arvados-dev/jenkins/run-tests.sh WORKSPACE=~/arvados
+docker run -it --privileged local/docker-arvados-dev time ~/arvados-dev/jenkins/run-tests.sh WORKSPACE=~/arvados
 ```
+
+N.B. passing '--privileged' to `docker run` is required in order for the test framework to access FUSE (via `/dev/fuse`). 
 
 To run all tests against the staging branch:
 ```bash
- docker run -it -e ARVADOS_DEV_REVISION=staging local/docker-arvados-dev
+ docker run -it --privileged -e ARVADOS_GIT_REV="staging" local/docker-arvados-dev
  ```
+ 
+ To fetch both `~/arvados` and `~/arvados-dev` from an alternative git repo and checkout a specific revision/tag/branch:
+ ```bash
+docker run -it --privileged -e ARVADOS_GIT_REPO="hgi https://github.com/wtsi-hgi/arvados.git" -e ARVADOS_GIT_REV="hgi/master" -e ARVADOS_DEV_GIT_REPO="hgi https://github.com/wtsi-hgi/arvados-dev.git" -e ARVADOS_DEV_GIT_REV="hgi/master"
+ ```
+ 
+ Note that there is also a trusted/automated build of this repository on [docker hub](https://hub.docker.com/r/mercury/docker-arvados-dev/), so you should be able to skip the `docker build` step above and replace `local/docker-arvados-dev` with `mercury/docker-arvados-dev` to run directly from docker hub's automated build. 
