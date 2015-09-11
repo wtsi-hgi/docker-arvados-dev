@@ -15,68 +15,81 @@ RUN \
 USER arvados
 WORKDIR /home/arvados
 
-# Install prerequisite debian packages
-RUN sudo apt-get -q=2 install -y \
-           	                 bison \
-	   			 build-essential \
-				 fuse \
-				 gettext \
-				 git \
-				 golang=2:1.3.3-1 \
-				 graphviz \
-				 iceweasel \
-				 libattr1-dev \
-				 libfuse-dev \
-				 libcrypt-ssleay-perl \
-				 libjson-perl \
-				 libcurl3 \
-				 libcurl3-gnutls \
-				 libcurl4-openssl-dev \
-				 libpcre3-dev \
-				 libpq-dev \
-				 libpython2.7-dev \
-				 libreadline-dev \
-				 libssl-dev \
-				 libxslt1.1 \
-				 linkchecker \
-				 nginx \
-				 perl-modules \
-				 postgresql \
-				 python \
-				 python-epydoc \
-				 pkg-config \
-				 sudo \
-				 virtualenv \
-				 wget \
-				 xvfb \
-				 zlib1g-dev
+# Install Arvados prerequisite debian packages
+RUN sudo apt-get -q=2 -y install \
+	 bison \
+	 build-essential \
+	 curl \
+	 fuse \
+	 gem \
+	 gettext \
+	 git \
+	 golang=2:1.3.3-1 \
+	 graphviz \
+	 iceweasel \
+	 libattr1-dev \
+	 libfuse-dev \
+	 libcrypt-ssleay-perl \
+	 libcurl3 \
+	 libcurl3-gnutls \
+	 libcurl4-openssl-dev \
+	 libjson-perl \
+	 libpcre3-dev \
+	 libpq-dev \
+	 libpython2.7-dev \
+	 libreadline-dev \
+	 libssl-dev \
+	 libxslt1.1 \
+	 libwww-perl \
+	 linkchecker \
+	 lsof \
+	 nginx \
+	 perl \ 
+	 perl-modules \
+	 postgresql \
+	 python \
+	 pkg-config \
+	 ruby2.1 \
+	 ruby2.1-dev \
+	 sudo \
+	 virtualenv \
+	 wget \
+	 xvfb \
+	 zlib1g-dev \
+    && \
+    sudo apt-get -q=2 -y --no-install-recommends install \
+	 python-epydoc \
+    && \
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -q=2 -y --no-install-recommends install \
+	 gitolite3
 
-# Install Ruby 2.1.6 from source
-RUN \
-    mkdir -p ~/src && \
-    ( wget -q -O - http://cache.ruby-lang.org/pub/ruby/2.1/ruby-2.1.6.tar.gz | tar xz ) && \
-    cd ruby-2.1.6 && \
-    ( ./configure --disable-install-rdoc && make && sudo make install ) > ~/src/ruby-2.1.6-configure-make-install.log
-
-# Install phantomjs 1.9.8 
+# Install phantomjs 1.9.8
 ENV PJS phantomjs-1.9.8-linux-x86_64
 RUN \
-    wget -q -P /tmp https://bitbucket.org/ariya/phantomjs/downloads/$PJS.tar.bz2 && \
+    cd /tmp && \
+    curl -LO https://bitbucket.org/ariya/phantomjs/downloads/$PJS.tar.bz2 && \
     ( echo "4ea7aa79e45fbc487a63ef4788a18ef7  /tmp/$PJS.tar.bz2" | md5sum -c ) && \
     sudo tar -C /usr/local -xjf /tmp/$PJS.tar.bz2 && \
     sudo ln -s ../$PJS/bin/phantomjs /usr/local/bin/
+
+# Install new versions of pip and setuptools
+RUN \
+    ( wget https://bootstrap.pypa.io/ez_setup.py -O - | sudo python ) && \
+    ( wget https://bootstrap.pypa.io/get-pip.py -O - | sudo python )
+
+# Setup git config
+RUN git config --global push.default matching
 
 # Clone Arvados source into ~arvados/
 RUN git clone https://github.com/curoverse/arvados.git
 RUN git clone https://github.com/curoverse/arvados-dev.git
 
-# Create fuse group to allow arvados to write to /dev/fuse
-# N.B. container may require `docker run --privileged` in order to actually mount fuse
+# Create fuse and docker groups
 RUN \
     sudo addgroup fuse && \
     sudo adduser arvados fuse && \
-    sudo chown root:fuse /dev/fuse && \
-    sudo chmod g+rw /dev/fuse
+    sudo addgroup docker && \
+    sudo adduser arvados docker
 
 # Configure postgres
 RUN (tr -cd a-zA-Z < /dev/urandom | head -c32 > ~/arvados.pgpass ) && \
@@ -89,12 +102,30 @@ RUN (tr -cd a-zA-Z < /dev/urandom | head -c32 > ~/arvados.pgpass ) && \
 RUN cp ~/arvados/services/api/config/application.yml.example ~/arvados/services/api/config/application.yml
 
 # Configure GOPATH to use Go source from git checkout
-ENV GOPATH ~/gocode
+ENV GOPATH /home/arvados/gocode
 RUN mkdir -p ${GOPATH}/src/git.curoverse.com && ln -s ~/arvados ${GOPATH}/src/git.curoverse.com/arvados.git
 
-# Install gitolite3
-RUN sudo DEBIAN_FRONTEND=noninteractive apt-get -q=2 install -y gitolite3 lsof
+# Add links to make ruby2.1 the default
+RUN \
+    sudo ln -s /usr/bin/ruby2.1 /usr/local/bin/ruby && \
+    sudo ln -s /usr/bin/erb2.1 /usr/local/bin/erb && \
+    sudo ln -s /usr/bin/gem2.1 /usr/local/bin/gem && \
+    sudo ln -s /usr/bin/irb2.1 /usr/local/bin/irb && \
+    sudo ln -s /usr/bin/rake2.1 /usr/local/bin/rake && \
+    sudo ln -s /usr/bin/rdoc2.1 /usr/local/bin/rdoc && \
+    sudo ln -s /usr/bin/ri2.1 /usr/local/bin/ri && \
+    sudo ln -s /usr/bin/testrb2.1 /usr/local/bin/testrb
 
+# Make sure nginx logs and libs are writable
+RUN \
+    sudo rm -r /var/log/nginx && \
+    mkdir ~/nginx.log && \
+    sudo ln -s ~/nginx.log /var/log/nginx && \
+    sudo rm -r /var/lib/nginx && \
+    mkdir ~/nginx.lib && \
+    sudo ln -s ~/nginx.lib /var/lib/nginx
+
+# Add entrypoint from docker-arvados-dev git repo
 ADD entrypoint.sh /docker/entrypoint.sh
 
 # Default revision to checkout
@@ -105,9 +136,4 @@ ENTRYPOINT ["/docker/entrypoint.sh"]
 
 # Set default command to git pull the latest arvados and arvados-dev, then 
 # run all tests against the ~/arvados workspace
-CMD ["cd ~/arvados && \
-     git pull && \
-     cd ~/arvados-dev && \
-     git pull && \
-     cd ~ && \
-     time ~/arvados-dev/jenkins/run-tests.sh WORKSPACE=~/arvados"]
+CMD ["time ~/arvados-dev/jenkins/run-tests.sh WORKSPACE=~/arvados"]
