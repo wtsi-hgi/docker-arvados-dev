@@ -50,7 +50,7 @@ echo "docker-arvados-dev entrypoint.sh: checking out ${ARVADOS_GIT_REV} (set ARV
 git checkout ${ARVADOS_GIT_REV}
 
 echo "docker-arvados-dev entrypoint.sh: starting Xvfb on :0.0"
-Xvfb :0.0 &
+sudo Xvfb -ac :0.0 &
 export DISPLAY=:0.0
 
 # Run remaining argument(s) in the shell
