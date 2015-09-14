@@ -16,7 +16,7 @@ USER arvados
 WORKDIR /home/arvados
 
 # Install Arvados prerequisite debian packages
-RUN sudo apt-get -q=2 -y install \
+RUN sudo apt-get -q=2 -y --no-install-recommends install \
 	 bison \
 	 build-essential \
 	 curl \
@@ -47,6 +47,7 @@ RUN sudo apt-get -q=2 -y install \
 	 perl-modules \
 	 postgresql \
 	 python \
+	 python-epydoc \
 	 pkg-config \
 	 ruby2.1 \
 	 ruby2.1-dev \
@@ -55,9 +56,6 @@ RUN sudo apt-get -q=2 -y install \
 	 wget \
 	 xvfb \
 	 zlib1g-dev \
-    && \
-    sudo apt-get -q=2 -y --no-install-recommends install \
-	 python-epydoc \
     && \
     sudo DEBIAN_FRONTEND=noninteractive apt-get -q=2 -y --no-install-recommends install \
 	 gitolite3
