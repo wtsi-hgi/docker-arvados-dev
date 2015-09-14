@@ -29,7 +29,13 @@ To run all tests against the staging branch:
  
  To fetch both `~/arvados` and `~/arvados-dev` from an alternative git repo and checkout a specific revision/tag/branch:
  ```bash
-docker run -it --privileged -e ARVADOS_GIT_REPO="hgi https://github.com/wtsi-hgi/arvados.git" -e ARVADOS_GIT_REV="hgi/master" -e ARVADOS_DEV_GIT_REPO="hgi https://github.com/wtsi-hgi/arvados-dev.git" -e ARVADOS_DEV_GIT_REV="hgi/master"
+docker run -it --privileged -e ARVADOS_GIT_REPO="hgi https://github.com/wtsi-hgi/arvados.git" -e ARVADOS_GIT_REV="hgi/master" -e ARVADOS_DEV_GIT_REPO="hgi https://github.com/wtsi-hgi/arvados-dev.git" -e ARVADOS_DEV_GIT_REV="hgi/master" local/docker-arvados-dev
  ```
  
  Note that there is also a trusted/automated build of this repository on [docker hub](https://hub.docker.com/r/mercury/docker-arvados-dev/), so you should be able to skip the `docker build` step above and replace `local/docker-arvados-dev` with `mercury/docker-arvados-dev` to run directly from docker hub's automated build. 
+
+For example, to pull the Docker image from Docker hub and run all tests against the wtsi-hgi branch, you could do:
+ ```bash
+docker run -it --privileged -e ARVADOS_GIT_REPO="hgi https://github.com/wtsi-hgi/arvados.git" -e ARVADOS_GIT_REV="hgi/master" -e ARVADOS_DEV_GIT_REPO="hgi https://github.com/wtsi-hgi/arvados-dev.git" -e ARVADOS_DEV_GIT_REV="hgi/master" mercury/docker-arvados-dev
+ ```
+ 
