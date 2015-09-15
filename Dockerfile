@@ -25,6 +25,7 @@ RUN sudo apt-get -q=2 -y --no-install-recommends install \
 	 gettext \
 	 git \
 	 golang=2:1.3.3-1 \
+	 golang-go.tools \
 	 graphviz \
 	 libattr1-dev \
 	 libfuse-dev \
@@ -48,6 +49,7 @@ RUN sudo apt-get -q=2 -y --no-install-recommends install \
 	 postgresql \
 	 python \
 	 python-epydoc \
+	 python-openssl \
 	 pkg-config \
 	 ruby2.1 \
 	 ruby2.1-dev \
