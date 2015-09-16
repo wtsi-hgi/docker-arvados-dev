@@ -54,6 +54,6 @@ sudo Xvfb -ac :0.0 &
 export DISPLAY=:0.0
 
 # Run remaining argument(s) in the shell
-echo "docker-arvados-dev entrypoint.sh: passing CMD to bash -c \"$@\""
+echo "docker-arvados-dev entrypoint.sh: passing CMD to sh -c \"$*\""
 cd ~
-bash -c "$@"
+sh -c "$*"
