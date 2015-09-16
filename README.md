@@ -17,7 +17,7 @@ To run all tests against the master branch (of https://github.com/curoverse/arva
  ```
 or, equivalently:
 ```bash
-docker run -it --privileged local/docker-arvados-dev time ~/arvados-dev/jenkins/run-tests.sh WORKSPACE=~/arvados
+docker run -it --privileged local/docker-arvados-dev 'time ~/arvados-dev/jenkins/run-tests.sh WORKSPACE=~/arvados'
 ```
 
 N.B. passing '--privileged' to `docker run` is required in order for the test framework to access FUSE (via `/dev/fuse`). 
