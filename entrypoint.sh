@@ -56,4 +56,4 @@ export DISPLAY=:0.0
 # Run remaining argument(s) in the shell
 echo "docker-arvados-dev entrypoint.sh: passing CMD to sh -c \"$*\""
 cd ~
-sh -c "$*"
+bash -c "$*"
